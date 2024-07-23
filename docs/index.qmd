@@ -2,7 +2,7 @@
 title: "**Extendable** projection of social contact matrices"
 subtitle: "Telethon Kids Institute"
 date: "2024-07-24"
-author: "Nicholas Tierney, Michael Lydeamore, Nick Golding, Chitra Saraswati, Aarathy Babu"
+author: "Nicholas Tierney, Chitra Saraswati, Michael Lydeamore, Nick Golding, Aarathy Babu"
 institute: Telethon Kids Institute
 format: 
   revealjs:
@@ -82,6 +82,11 @@ nipa <- list(red = "#c03018",
 
 ```
 
+## Welcome!
+
+-   First Infectious Disease Modelling Seminar Series!
+-   Questions + discussion are welcome throughout
+
 ## What this talk is about
 
 -   Touch on the **overall** approach for methods. A large portion of my role was on software and interface design.
@@ -94,11 +99,7 @@ nipa <- list(red = "#c03018",
 
 -   August, 2021: Australia is working on the plan to reopen, part of "The Doherty Report"
 
--   They need more hands to help with data analysis and software development
-
--   I joined to assist for \~4 months
-
--   Helped develop pipelines + software for disease modelling, establish code base for people to contribute
+-   I helped develop pipelines + software for disease modelling, establish code base for people to contribute
 
 ## Social spread of disease
 
@@ -228,11 +229,11 @@ ggplot(df_contact_ages,
 
 ## What do you do with a contact matrix?
 
-- If we know **the number of times people have contact**, we can model:
-    - **Which age groups** might spread COVID
-    - **How many** COVID cases would get transmitted
-    - How vaccination **reduces** transmission
-- Do the above for **different areas** in Australia
+-   If we know **the number of times people have contact**, we can model:
+    -   **Which age groups** might spread COVID
+    -   **How many** COVID cases would get transmitted
+    -   How vaccination **reduces** transmission
+-   Do the above for **different areas** in Australia
 
 ## Do we know how much contact people have?
 
@@ -252,7 +253,7 @@ ggplot(df_contact_ages,
 
 Published in 2008, Mossong et. al undertook a contact diary study of 7290 participants across Europe.
 
-_It remains the most widely cited contact diary study_.
+*It remains the most widely cited contact diary study*.
 
 ![](images/mossong-combined.png)
 
@@ -286,13 +287,14 @@ _It remains the most widely cited contact diary study_.
 -   Use setting-specific survey data on household, school, classroom, and workplace composition
 -   Combine with empirical data on contact patterns in Europe using statistical models
 
-## Prem et al 
+## Prem et al
 
-::: {.columns}
-::: {.column width='50%'}
+::: columns
+::: {.column width="50%"}
 ![](images/prem-paper-fig.png){fig-align="center"}
 :::
-::: {.column width='50%'}
+
+::: {.column width="50%"}
 -   One of the most widely used approaches to synthetic contact matrices
 -   Extensively applied across infectious diseases applications
 -   Initially provided 152 matrices for 152 countries (177 later in 2020)
@@ -301,18 +303,18 @@ _It remains the most widely cited contact diary study_.
 
 ## Creating synthetic contact matrices
 
-::: {.columns}
-::: {.column width='70%'}
-- Prem et. al formed a model that predicts the **number of contacts** based on the **age of participants** in different **settings** (Home, Work, School, Other)
-- $\text{n_contacts} \sim age_{ij} + setting_{k}$
-- This model then allows for prediction to settings that are outside the original POLYMOD countries.
-- They provide **new contact matrices** for a **given country**
+::: columns
+::: {.column width="70%"}
+-   Prem et. al formed a model that predicts the **number of contacts** based on the **age of participants** in different **settings** (Home, Work, School, Other)
+-   $\text{n_contacts} \sim age_{ij} + setting_{k}$
+-   This model then allows for prediction to settings that are outside the original POLYMOD countries.
+-   They provide **new contact matrices** for a **given country**
 :::
-::: {.column width='30%'}
+
+::: {.column width="30%"}
 ![](images/prem-contact-mat.png){fig-align="center"}
 :::
 :::
-
 
 ##  {background-image="images/prem-dir-mats.png" background-size="contain"}
 
@@ -332,7 +334,7 @@ But what we needed to do is get contact matrices for a given age population stru
 
 -   We want to be able use a **population age distribution**
 
-::: {.fragment}
+::: fragment
 ```{r}
 #| label: subiaco
 #| echo: true
@@ -345,7 +347,7 @@ subiaco
 
 -   Input **population age distribution** and get out a contact matrix.
 
-::: {.fragment}
+::: fragment
 ```{r}
 #| eval: false
 #| echo: true
@@ -358,39 +360,43 @@ extrapolate_from_data(
 
 ## How do we extend Prem's method?
 
--   [Code is provided](https://github.com/kieshaprem/synthetic-contact-matrices), but a few key issues:
+-   [Prem's code is on github](https://github.com/kieshaprem/synthetic-contact-matrices) 🎉
+
+-   But a few key issues 🚨
 
     -   It was code **not** written **for reuse** (code vs software)
 
         -   No interface to specify a given country/region
 
         -   Unclear which code matches which methods
-        -   Australia in original 152 countries, not in updated estimates provided in 2020.
 
+        -   Australia in original 152 countries, not in updated estimates provided in 2020.
 
 ## An alternative approach
 
-- We developed an *open-source* approach
-- The R package `conmat`
-- It can be applied to any input population (big or small).
+-   We developed an *open-source* approach
 
-- [github.com/idem-lab/conmat](https://www.github.com/idem-lab/conmat)
+-   The R package `conmat`
 
-- install using:
+-   It can be applied to any input population (big or small).
 
-::: {.fragment}
+-   [github.com/idem-lab/conmat](https://www.github.com/idem-lab/conmat)
+
+-   install using:
+
+::: fragment
 ```{r}
 #| eval: false
 #| echo: true
 remotes::install_github("idem-lab/conmat")
 ```
-::: 
+:::
 
 ## Model details
 
-- These models don't have much to go on. They are trained on the number of contacts between age groups $i$ and $j$:
+-   These models don't have much to go on. They are trained on the number of contacts between age groups $i$ and $j$:
 
-::: {.fragment}
+::: fragment
 $$\begin{aligned}
 c_{ij} = \beta_0 + \beta_1(|i-j|) + &\beta_2(|i-j|^2) + \beta_3(i\times j) + \beta_4(i+j) +\\ &\beta_5\max(i, j) + \beta_6\min(i, j)
 \end{aligned}
@@ -398,18 +404,18 @@ $$
 :::
 
 ::: {.fragment .callout-tip}
-We want to fit this as a generalised additive model, so _actually_ we have splines on these terms to satisfy the smoothness requirements. This is very similar to the approach by Prem et. al who perform post-hoc smoothing of the parameters after MCMC.
+We want to fit this as a generalised additive model, so *actually* we have splines on these terms to satisfy the smoothness requirements. This is very similar to the approach by Prem et. al who perform post-hoc smoothing of the parameters after MCMC.
 :::
 
 ## Model details
 
-* All that is needed to make predictions is the number of individuals in different age groups. 
-* This is easily obtainable information from most statistics bureaus/governments.
+-   All that is needed to make predictions is the number of individuals in different age groups.
+-   This is easily obtainable information from most statistics bureaus/governments.
 
 ## Data sources {.smaller}
 
-::: {.columns}
-::: {.column width='50%'}
+::: columns
+::: {.column width="50%"}
 The `socialmixr` package has this information for most countries:
 
 ```{r}
@@ -417,7 +423,8 @@ The `socialmixr` package has this information for most countries:
 socialmixr::wpp_age("Australia", 2015)
 ```
 :::
-::: {.column width='50%' .fragment}
+
+::: {.column .fragment width="50%"}
 And for inside Australia, `conmat` provides some ABS functions:
 
 ```{r}
@@ -426,7 +433,6 @@ conmat::abs_age_lga("Subiaco (C)")
 ```
 :::
 :::
-
 
 ## Demonstration of conmat
 
@@ -501,20 +507,16 @@ synthetic_polymod_oz <- extrapolate_polymod(
 )
 ```
 
-## Contact matrix: Australia
-
-```{r}
-#| label: plot-matrix-polymod
-#| echo: true
-autoplot(synthetic_polymod_oz$home)
-```
-
 ## Comment: **Software** vs **code**
 
--  It is great that Prem et al provided their estimates, and their code
-- **Code** describes **how** you did something
-- **Software** is designed for **reuse**
+-   It is great Prem et al provide estimates, and [code](https://github.com/kieshaprem/synthetic-contact-matrices)
+
+-   **Code** describes **how** you did something
+
+-   **Software** is designed for **reuse**
+
 -   [Github Issues are very useful](https://github.com/njtierney/conmat/issues?q=is%3Aissue+is%3Aclosed)
+
 -   Extra contributions can be implemented as [pull requests](https://github.com/njtierney/conmat/pulls?page=2&q=is%3Apr+is%3Aclosed) which can be tested with GH actions
 
 ## Why should I use `conmat`? It's easy!
@@ -538,7 +540,6 @@ population
 
 Getting a contact matrix is easy:
 
-
 ```{r}
 #| cache: true
 #| echo: true
@@ -556,7 +557,6 @@ contact_rates$home
 ```
 
 ## Why should I use `conmat`? You can use a custom population
-
 
 ```{r}
 #| code-line-numbers: "1-6|8-15|17-20"
@@ -592,20 +592,23 @@ flat_contact_rates$home
 
 ## Future Directions
 
--   Implement **other social contact diaries** beyond POLYMOD
 -   Pre compute new matrices for countries/regions **syncomat** by Chitra Saraswati
+-   Implement **other social contact diaries** beyond POLYMOD
 -   Allow for using **sub-yearly age groups**
 -   Validating against Prem and other methods
 -   Interface to changing GAM model terms or specify model
 
 ## Conclusion
 
-* Contact matrices are frequently used in infectious diseases modelling
-* Standard Prem et. al matrices are not written for re-use
-* `conmat` provides an interface to easily generate and update models from any data source
-* Can integrate vaccination, calculate next generation matrices, and a handful of other features
+-   Contact matrices are frequently used in infectious diseases modelling
 
-- It's available **right now**: [github.com/idem-lab/conmat](https://www.github.com/idem-lab/conmat)
+-   Standard Prem et. al matrices are not written for re-use
+
+-   `conmat` provides an interface to easily generate and update models from any data source
+
+-   Can integrate vaccination, calculate next generation matrices, and a handful of other features
+
+-   It's available **right now**: [github.com/idem-lab/conmat](https://www.github.com/idem-lab/conmat)
 
 # Thanks
 
@@ -628,8 +631,7 @@ flat_contact_rates$home
 
 `r icon_plane` nicholas.tierney\@gmail.com
 
-
-## {background-image="https://imgs.xkcd.com/comics/code_lifespan_2x.png" background-size="auto"}
+##  {background-image="https://imgs.xkcd.com/comics/code_lifespan_2x.png" background-size="auto"}
 
 # **End.**
 
@@ -743,7 +745,6 @@ synthetic_settings_5y_subiaco <- predict_setting_contacts(
 synthetic_settings_5y_subiaco
 ```
 
-
 ## In code: How does the model work?
 
 (simplified)
@@ -771,4 +772,3 @@ mgcv::bam(
 ```
 
 # **This is the last slide.**
-
